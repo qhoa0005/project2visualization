@@ -1,0 +1,44 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": "Heat Map: Burnt Area by Month and Year",
+  "width": 600,
+  "height": 300,
+  "data": {
+    "url": "https://gist.githubusercontent.com/qhoa0005/79bb49b9583be197b341bed9b63eb626/raw/db773bd6dda6b5d6e0bcbfb9bbf8318c9b22529a/total_burnt_2011_2017.csv"
+  },
+  "transform": [
+    {
+      "calculate": "{'1': 'Jan', '2': 'Feb', '3': 'Mar', '4': 'Apr', '5': 'May', '6': 'Jun', '7': 'Jul', '8': 'Aug', '9': 'Sep', '10': 'Oct', '11': 'Nov', '12': 'Dec'}[datum.month]",
+      "as": "month_name"
+    }
+  ],
+  "mark": "rect",
+  "encoding": {
+    "x": {
+      "field": "month",
+      "type": "ordinal",
+      "title": "Month",
+      "axis": {
+        "labelExpr": "{'1': 'Jan', '2': 'Feb', '3': 'Mar', '4': 'Apr', '5': 'May', '6': 'Jun', '7': 'Jul', '8': 'Aug', '9': 'Sep', '10': 'Oct', '11': 'Nov', '12': 'Dec'}[datum.value]",
+        "labelAngle": 0
+      }
+    },
+    "y": {
+      "field": "year",
+      "type": "ordinal",
+      "title": "Year",
+      "sort": "descending"
+    },
+    "color": {
+      "field": "total_burnt",
+      "type": "quantitative",
+      "title": "Burnt Area (kha)",
+      "scale": {"scheme": "reds"}
+    },
+    "tooltip": [
+      {"field": "year", "type": "ordinal", "title": "Year"},
+      {"field": "month_name", "type": "nominal", "title": "Month"},
+      {"field": "total_burnt", "type": "quantitative", "title": "Burnt Area (kha)", "format": ".2f"}
+    ]
+  }
+}

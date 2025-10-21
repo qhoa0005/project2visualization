@@ -1,0 +1,144 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "projection": {"type": "mercator"},
+  "hconcat": [
+    {
+      "width": 700,
+      "height": 500,
+      "layer": [
+        {
+          "name": "country-base",
+          "data": {
+            "url": "https://gist.githubusercontent.com/qhoa0005/2f1de9bb126e7384b964aa5cc706e1e8/raw/7f703135c469065a8db915956102078721098a83/AustraliaMap.csv",
+            "format": {"type": "topojson", "feature": "ne_110m_admin_0_countries"}
+          },
+          "transform": [
+            {"filter": "datum.properties && (datum.properties.ADMIN === 'Australia' || datum.properties.NAME === 'Australia')"}
+          ],
+          "mark": {"type": "geoshape", "fill": "#ffffff", "stroke": "#bbb", "strokeWidth": 0.5}
+        },
+        {
+          "name": "state-choropleth",
+          "data": {
+            "url": "https://raw.githubusercontent.com/tonywr71/GeoJson-Data/master/australian-states.json",
+            "format": {"type": "json", "property": "features"}
+          },
+          "transform": [
+            {"calculate": "datum.properties.STATE_NAME", "as": "STATE_NAME"},
+            {
+              "calculate": "datum.STATE_NAME === 'New South Wales' ? 'NSW' : datum.STATE_NAME === 'Victoria' ? 'VI' : datum.STATE_NAME === 'Queensland' ? 'QL' : datum.STATE_NAME === 'South Australia' ? 'SA' : datum.STATE_NAME === 'Western Australia' ? 'WA' : datum.STATE_NAME === 'Tasmania' ? 'TA' : datum.STATE_NAME === 'Northern Territory' ? 'NT' : null",
+              "as": "abbr"
+            },
+            {
+              "lookup": "abbr",
+              "from": {
+                "data": {
+                  "url": "https://gist.githubusercontent.com/qhoa0005/430c24fdb361738e1dab1082dc1eb765/raw/2d9c73e20c35efbbf30192c1aebc3a4e3bcecc52/total_wildfire_burnt_area_2011_2020.csv",
+                  "format": {"type": "csv"}
+                },
+                "key": "State",
+                "fields": ["burnt_kha"]
+              }
+            }
+          ],
+          "mark": {"type": "geoshape"},
+          "encoding": {
+            "color": {
+              "field": "burnt_kha",
+              "type": "quantitative",
+              "title": "Burnt area (kha)",
+              "scale": {"scheme": "reds"}
+            },
+            "tooltip": [
+              {"field": "STATE_NAME", "title": "State"},
+              {"field": "burnt_kha", "title": "Total burnt area 2011-2020 (kha)", "format": ",.2f"}
+            ]
+          }
+        },
+        {
+          "name": "fire-points",
+          "data": {
+            "values": [
+              {"abbr": "NSW", "lon": 147.0, "lat": -32.0},
+              {"abbr": "VI", "lon": 144.0, "lat": -37.0},
+              {"abbr": "QL", "lon": 143.0, "lat": -20.0},
+              {"abbr": "SA",  "lon": 135.5, "lat": -30.0},
+              {"abbr": "WA",  "lon": 122.0, "lat": -25.0},
+              {"abbr": "TA", "lon": 147.0, "lat": -42.0},
+              {"abbr": "NT",  "lon": 133.0, "lat": -19.0}
+            ]
+          },
+          "transform": [
+            {
+              "lookup": "abbr",
+              "from": {
+                "data": {
+                  "url": "https://gist.githubusercontent.com/qhoa0005/430c24fdb361738e1dab1082dc1eb765/raw/2d9c73e20c35efbbf30192c1aebc3a4e3bcecc52/total_wildfire_burnt_area_2011_2020.csv",
+                  "format": {"type": "csv"}
+                },
+                "key": "State",
+                "fields": ["burnt_kha"]
+              }
+            }
+          ],
+          "mark": {"type": "circle", "opacity": 0.8, "stroke": "white", "strokeWidth": 1},
+          "encoding": {
+            "longitude": {"field": "lon"},
+            "latitude": {"field": "lat"},
+            "size": {"field": "burnt_kha", "type": "quantitative", "scale": {"range": [50, 2000]}},
+            "color": {"value": "#2c3e50"},
+            "tooltip": [
+              {"field": "abbr", "title": "State"},
+              {"field": "burnt_kha", "title": "Total burnt area 2011-2020 (kha)", "format": ",.2f"}
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "legend-bars",
+      "width": 260,
+      "height": 400,
+      "data": {
+        "url": "https://gist.githubusercontent.com/qhoa0005/430c24fdb361738e1dab1082dc1eb765/raw/2d9c73e20c35efbbf30192c1aebc3a4e3bcecc52/total_wildfire_burnt_area_2011_2020.csv",
+        "format": {"type": "csv"}
+      },
+      "layer": [
+        {
+          "mark": {"type": "bar"},
+          "encoding": {
+            "y": {
+              "field": "State",
+              "type": "ordinal",
+              "sort": {"field": "burnt_kha", "order": "descending"},
+              "title": "State"
+            },
+            "x": {
+              "field": "burnt_kha",
+              "type": "quantitative",
+              "title": "Burnt area (kha)"
+            },
+            "color": {
+              "field": "burnt_kha",
+              "type": "quantitative",
+              "scale": {"scheme": "reds"},
+              "legend": null
+            }
+          }
+        },
+        {
+          "mark": {"type": "text", "align": "left", "dx": 3, "baseline": "middle"},
+          "encoding": {
+            "y": {
+              "field": "State",
+              "type": "ordinal",
+              "sort": {"field": "burnt_kha", "order": "descending"}
+            },
+            "x": {"field": "burnt_kha", "type": "quantitative"},
+            "text": {"field": "burnt_kha", "type": "quantitative", "format": ",.0f"}
+          }
+        }
+      ]
+    }
+  ]
+}
